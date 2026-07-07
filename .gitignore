@@ -1,0 +1,10 @@
+# Ignorar carpetas de caché de Python
+**/__pycache__/
+*.pyc
+
+# Ignorar archivos de variables de entorno (¡Contraseñas y API keys!)
+.env
+
+# Ignorar archivos temporales del sistema operativo
+.DS_Store
+Thumbs.db
