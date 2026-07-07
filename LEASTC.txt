@@ -1,0 +1,36 @@
+events {
+    # Aprovechamos para subir las conexiones de Nginx y evitar cuellos de botella
+    worker_connections 4096; 
+}
+
+http {
+    upstream books_api { 
+        # Esta es la directiva mágica para activar Least Connections
+        least_conn; 
+        
+        server books_service_instancia1:5000;
+        server books_service_instancia2:5000;
+        server books_service_instancia3:5000;
+    } 
+    
+    upstream users_api { server users_service:5000; }
+    upstream orders_api { server orders_service:5000; }
+
+    server {
+        listen 80;
+
+        location /api/books/ {
+            proxy_pass http://books_api;
+            # Mantenemos esta cabecera para que puedas rastrearlo en JMeter
+            add_header X-Backend-Server $upstream_addr; 
+        }
+
+        location /api/users/ {
+            proxy_pass http://users_api;
+        }
+
+        location /api/orders/ {
+            proxy_pass http://orders_api;
+        }
+    }
+}

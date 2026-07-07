@@ -1,0 +1,78 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:13
+    environment:
+      POSTGRES_DB: biblioteca
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password
+
+  books_service_instancia1:
+    build: ./books_service
+    environment:
+      - DATABASE_URL=postgresql://admin:password@db:5432/biblioteca
+    volumes:
+      - ./books_service:/app
+    # Cambiamos --reload por --workers 4
+    command: uvicorn app:app --host 0.0.0.0 --port 5000 --workers 4
+    depends_on:
+      - db
+
+  books_service_instancia2:
+    build: ./books_service
+    environment:
+      - DATABASE_URL=postgresql://admin:password@db:5432/biblioteca
+    volumes:
+      - ./books_service:/app
+    # Cambiamos --reload por --workers 4
+    command: uvicorn app:app --host 0.0.0.0 --port 5000 --workers 4
+    depends_on:
+      - db
+      
+  books_service_instancia3:
+    build: ./books_service
+    environment:
+      - DATABASE_URL=postgresql://admin:password@db:5432/biblioteca
+    volumes:
+      - ./books_service:/app
+    # Cambiamos --reload por --workers 4
+    command: uvicorn app:app --host 0.0.0.0 --port 5000 --workers 4
+    depends_on:
+      - db  
+
+  users_service:
+    build: ./users_service
+    environment:
+      - DATABASE_URL=postgresql://admin:password@db:5432/biblioteca
+    volumes:
+      - ./users_service:/app
+    # Cambiamos --reload por --workers 4
+    command: uvicorn app:app --host 0.0.0.0 --port 5000 --workers 4
+    depends_on:
+      - db
+
+  orders_service:
+    build: ./orders_service
+    environment:
+      - DATABASE_URL=postgresql://admin:password@db:5432/biblioteca
+    volumes:
+      - ./orders_service:/app
+    # Cambiamos --reload por --workers 4
+    command: uvicorn app:app --host 0.0.0.0 --port 5000 --workers 4
+    depends_on:
+      - db
+
+  api_gateway:
+    image: nginx:latest
+    ports:
+      - "8080:80" 
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - books_service_instancia1 
+      - books_service_instancia2 
+      - books_service_instancia3 
+      - users_service
+      - orders_service
+      
